@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.boardfreeMapper">
+
+	<!-- 게시판 전체조회 -->
+	<select id="listAll" resultType="BoardDto">
+		SELECT * FROM board_free
+	</select>
+
+	<!-- 글 읽기 -->
+	<select id="selectOne" parameterType="int" resultType="BoardDto">
+		SELECT *
+		FROM board_free WHERE bf_no=#{bf_no}
+	</select>
+
+	<!-- 글 추가 -->
+	<insert id="insert" parameterType="BoardDto">
+		INSERT INTO board_free
+		(bf_title,bf_contents,member_m_nick)
+		VALUES
+		(#{bf_title},#{bf_contents},#{member_m_nick})
+	</insert>
+
+	<!-- 글 수정 -->
+	<update id="update" parameterType="BoardDto">
+		UPDATE board_free SET
+		bf_title=#{bf_title}, bf_contents=#{bf_contents}
+		WHERE bf_no=#{bf_no}
+	</update>
+
+	<!-- 조회수 증가 -->
+	<update id="viewCnt" parameterType="int">
+		UPDATE board_free SET
+		bf_viewCnt=bf_viewCnt+1
+		WHERE bf_no=#{bf_no};
+	</update>
+
+	<!-- 글 삭제 -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM board_free
+		WHERE
+		bf_no=#{bf_no}
+	</delete>
+
+	<!-- 해당 게시글번호에 댓글 조회하는 SQL : 댓글리스트 -->
+	<select id="detail1" parameterType="java.lang.Integer"
+		resultType="BoardReply">
+		SELECT * FROM board_free_reply
+		WHERE
+		board_free_bf_no=#{board_free_bf_no}
+	</select>
+
+	<!-- 댓글쓰기 rewriter ->작성자, rememo->내용, member_m_nick -->
+	<insert id="reply" parameterType="BoardReply">
+		INSERT INTO
+		board_free_reply(member_m_nick,bfr_contents,board_free_bf_no)
+		VALUES
+		(#{member_m_nick},#{bfr_contents},#{board_free_bf_no})
+	</insert>
+
+	<!-- 해당 댓글 조회 -->
+	<select id="detailReply" parameterType="int"
+		resultType="BoardReply">
+		SELECT * board_free_reply
+		WHERE bfr_no = #{bfr_no}
+	</select>
+
+	<!-- 댓글 수정 -->
+	<update id="replyupdate" parameterType="BoardReply">
+		UPDATE board_free_reply
+		SET bfr_contents=#{bfr_contents}
+		WHERE bfr_no=#{bfr_no}
+
+	</update>
+
+	<!--댓글 삭제 -->
+	<delete id="replyDelete" parameterType="int">
+		DELETE FROM
+		board_free_reply
+		WHERE bfr_no =#{bfr_no}
+	</delete>
+
+	<!-- 로그인 처리를 위한 SQL -->
+	<select id="login" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT m_id, m_password, m_nick
+		FROM member
+		WHERE
+		m_id=#{m_id} and m_password=#{m_password}
+	</select>
+
+	<!-- 닉 네임 가져오기?(테스트) -->
+	<select id="nick" resultType="string">
+		SELECT m_nick FROM member WHERE
+		m_id=#{m_id}
+	</select>
+
+
+	<!-- 페이징 -->
+	<select id="listPage" resultType="BoardDto">
+  <![CDATA[
+  	select
+  		bf_no,bf_title,bf_contents,bf_regDate,member_m_nick,bf_viewCnt
+  	from
+  	board_free
+  	where bf_no > 0
+  	order by bf_no desc, bf_regDate desc
+  	limit #{page}, 10
+  ]]>
+	</select>
+
+	<select id="listCriteria" resultType="BoardDto">
+  <![CDATA[
+  	select
+  	bf_no,bf_title,bf_contents,member_m_nick,bf_regDate,bf_viewCnt
+  	from
+  	board_free
+  	where bf_no > 0
+  	order by bf_no desc, bf_regDate desc
+  	limit #{pageStart}, #{perPageNum}
+  ]]>
+	</select>
+
+	<select id="countPaging" resultType="int">
+  	<![CDATA[
+  		select
+  		count(bf_no)
+  		from
+  		board_free
+  		where bf_no > 0
+  	]]>
+	</select>
+
+	<!-- 검색 조건 -->
+	<!-- n : 검색조건이 없음, t : 제목으로 검색, c : 내용으로 검색, w :작성자로 검색 ,tc : 제목이나 내용으로 
+		검색 , cw : 내용이나 작성자로 검색 , tcw : 제목이나 내용 혹은 작성자로 검색 -->
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				and bf_title like CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				and bf_contents like CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="searchType == 'w'.toString()">
+				and member_m_nick like CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				and (bf_title like CONCAT('%',#{keyword},'%') OR
+				bf_contents like
+				CONCAT
+				('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				and (bf_contents like CONCAT('%',#{keyword},'%') OR
+				member_m_nick like
+				CONCAT
+				('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				and (bf_title like CONCAT('%',#{keyword},'%')
+				OR
+				bf_contents like CONCAT('%',#{keyword},'%')
+				OR
+				member_m_nick like
+				CONCAT('%',#{keyword},'%'))
+			</if>
+		</if>
+	</sql>
+
+	<!-- 검색 -->
+	<select id="listSearch" resultType="BoardDto">
+  <![CDATA[
+  	select *from board_free
+  	where bf_no > 0
+  ]]>
+		<include refid="search"></include>
+ 	<![CDATA[
+ 		order by bf_no desc
+ 		limit #{pageStart}, #{perPageNum}
+ 	]]>
+	</select>
+
+	<select id="listSearchCount" resultType="int">
+  <![CDATA[
+  	select count(bf_no)
+  	from board_free
+  	where bf_no > 0
+  ]]>
+		<include refid="search"></include>
+	</select>
+
+	<!-- 게시글 추천 -->
+	<update id="updateLike" parameterType="int">
+		update board_free set
+		bf_upCnt = bf_upCnt +1
+		where bf_no =#{no}
+	</update>
+
+	<!-- 게시글 추천수취소 -->
+	<update id="updateLikeCancel" parameterType="int">
+		update board_free
+		set
+		bf_upCnt = bf_upCnt - 1
+		where bf_no = #{no}
+	</update>
+
+	<!-- 게시글 추천 시 Like 테이블에 insert -->
+	<insert id="insertLike">
+		insert into board_like (board_free_bf_no ,
+		member_m_nick)
+		values (#{no},#{member_m_nick})
+	</insert>
+
+	<!-- 게시글 추천취소 시 delete -->
+	<delete id="deleteLike">
+		delete from board_like where board_free_bf_no = #{no}
+		and member_m_nick = #{member_m_nick}
+	</delete>
+
+	<!-- 게시글 추천 시 Check를 1로 만들어서 중복방지 -->
+	<update id="updateLikeCheck">
+		update board_like set likecheck = 1
+		where
+		board_free_bf_no = #{no} and member_m_nick = #{member_m_nick}
+	</update>
+
+	<!-- 게시글 추천취소 시 다시 0 -->
+	<update id="updateLikeCheckCancel">
+		update board_like set likecheck = 0
+		where
+		board_free_bf_no = #{no} and member_m_nick = #{member_m_nick}
+	</update>
+
+	<!-- 게시글 추천 중복방지 select문 -->
+	<select id="likeCheck" resultType="int">
+		select count(*) from
+		board_like where board_free_bf_no = #{no} and member_m_nick =
+		#{member_m_nick}
+	</select>
+
+	<!-- 게시글 싫어요 -->
+	<update id="downlike" parameterType="int">
+		update board_free set
+		bf_downCnt = bf_downCnt +1
+		where bf_no =#{no}
+	</update>
+
+	<!-- 싫어요 취소 -->
+	<update id="downlikeCancel" parameterType="int">
+		update board_free set
+		bf_downCnt = bf_downCnt -1
+		where bf_no =#{no}
+	</update>
+
+
+	<!-- 게시글 싫어요 board_down 테이블에 insert -->
+	<insert id="insertdown">
+		insert into board_down (bf_no,
+		member_m_nick)
+		values (#{no},#{member_m_nick})
+	</insert>
+
+	<!-- 게시글 싫어요 취소 시 delete -->
+	<delete id="deletedown">
+		delete from board_down where bf_no = #{no}
+		and member_m_nick = #{member_m_nick}
+	</delete>
+
+	<!-- 게시글 싫어요 시 Check를 1로 만들어서 중복방지 -->
+	<update id="downLikeCheck">
+		update board_down set downchech = 1
+		where
+		bf_no = #{no} and member_m_nick = #{member_m_nick}
+	</update>
+
+	<!-- 게시글 싫어요취소 시 다시 0 -->
+	<update id="downLikeCheckCancel">
+		update board_down set downchech = 0
+		where
+		bf_no = #{no} and member_m_nick = #{member_m_nick}
+	</update>
+
+	<!-- 게시글 싫어요 중복방지 select문 -->
+	<select id="downCheck" resultType="int">
+		select count(*) from
+		board_down where bf_no = #{no} and member_m_nick =
+		#{member_m_nick}
+	</select>
+
+
+</mapper>

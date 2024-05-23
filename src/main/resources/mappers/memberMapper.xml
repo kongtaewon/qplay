@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.memberMapper">
+
+	<!-- 회원 가입 -->
+	<insert id="signup" parameterType="MemberDTO">
+		insert into qplay.member (m_id, m_nick, m_password, m_roll, m_regDate)
+		values
+		(#{m_id}, #{m_nick}, #{m_password}, 'member', CURRENT_TIMESTAMP)
+	</insert>
+	
+	
+	<!-- 회원 탈퇴 -->
+	<update id="delete" parameterType="int">
+		update qplay.member
+		set
+		m_secDate=CURRENT_TIMESTAMP
+		where m_no = #{m_no}
+	</update>
+	
+	<!-- 회원 탈퇴 해제 -->
+	<update id="deletecancel" parameterType="int">
+		update qplay.member
+		set
+		m_secDate=null
+		where m_no=#{m_no}
+	</update>
+	
+	<!-- 로그인 -->
+	<select id="login" parameterType="java.util.Map" resultType="java.util.Map">
+		select m_no, m_id, m_nick, m_password, m_roll
+		from qplay.member
+		where m_secDate is null and m_id=#{m_id} and m_password=#{m_password}
+	</select>
+	
+	<!-- id로 m_no 가져오기 -->
+	<select id="mno" parameterType="String" resultType="int">
+		select m_no
+		from qplay.member
+		where m_id=#{member_m_id}
+	</select>
+	
+	<!--                   
+	<닉네임 변경>
+	<update id="chgnick" parameterType="MemberDTO">
+		update qplay.member
+		set
+		m_nick=#{m_nick}
+		where m_no=#{m_no}
+	</update>
+	-->
+	
+	<!-- 닉네임 중복 체크 -->
+	<select id="nickcheck" parameterType="MemberDTO" resultType="int">
+		select
+		exists
+		(select 1 from qplay.member where m_nick=#{m_nick})
+	</select>
+	
+	<!-- id 중복 체크 -->
+	<select id="idcheck" parameterType="MemberDTO" resultType="int">
+		select
+		exists
+		(select 1 from qplay.member where m_id=#{m_id})
+	</select>
+  
+  
+  
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="kr.co.qplay.worldcup">
+ 		
+	<select id="selectAll" parameterType="int" resultType="kr.co.qplay.worldcup.wChoiceDTO" >
+		SELECT * FROM qplay.worldcup_choice where w_no = #{w_no}
+	</select>
+	
+	<select id="selectWC" resultType="kr.co.qplay.worldcup.WorldCupDTO">
+		select w_no, w_title, w_contents, w_round, w_viewCnt, w_endCnt
+		from worldcup
+	</select> 
+	
+	<select id="selectTitle" parameterType="int" resultType="String">
+		select w_title
+		from worldcup
+		where w_no=#{w_no}
+	</select>
+	
+	<select id="selectWno" parameterType="String" resultType="int">
+		select w_no
+		from worldcup
+		where w_title=#{w_title}
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="upViewCnt" parameterType="int">
+		update worldcup 
+		set w_viewCnt = w_viewCnt+1 
+		where w_no = #{w_no}
+	</update>
+	<!-- 완료횟수 증가 -->
+	<update id="upEndCnt" parameterType="int">
+		update worldcup 
+		set w_endCnt = w_endCnt+1 
+		where w_no = #{w_no}
+	</update>
+	<!-- 선택횟수 증가 -->
+	<update id="upChoiceCnt" parameterType="String">
+		update worldcup_choice 
+		set wc_choiceCnt = wc_choiceCnt+1 
+		where wc_contents = #{wc_contents}
+	</update>
+	<!-- 우승횟수 증가 -->
+	<update id="upFinalCnt" parameterType="String">
+		update worldcup_choice 
+		set wc_finalCnt = wc_finalCnt+1 
+		where wc_contents = #{wc_contents}
+	</update>
+	<!-- 신규 월드컵  -->
+	<insert id="insertWC" parameterType="kr.co.qplay.worldcup.WorldCupDTO">
+		insert into
+		worldcup(w_title, w_contents, w_round)	
+		values (#{w_title}, #{w_contents}, #{w_round})
+	</insert>
+	<!-- 신규 월드컵에 선택지 추가 -->
+	<insert id="insertChoice" parameterType="kr.co.qplay.worldcup.wChoiceDTO">
+		insert into
+		worldcup_choice(w_no,wc_contents)	
+		values (#{w_no},#{wc_contents})	
+	</insert>
+	<!-- 월드컵 삭제 -->
+	<delete id="delWC" parameterType="int">
+		delete 
+		from worldcup
+		where w_no=#{w_no}
+	</delete>
+	<!-- 월드컵 선택지 삭제 -->
+	<delete id="delChoice" parameterType="int">
+		delete 
+		from worldcup_choice
+		where w_no=#{w_no}
+	</delete>
+	
+	<select id="test" resultType="Map">
+		select * from worldcup_choice
+	</select>
+ </mapper>

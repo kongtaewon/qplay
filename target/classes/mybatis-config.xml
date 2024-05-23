@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases>
+		<typeAlias type="kr.co.qplay.quizmultiple.QuizMultipleDTO" alias="qmdto"/>	
+		<typeAlias type="kr.co.qplay.quizmultiple.QuizMultipleChoiceDTO" alias="qmcdto"/>	
+		<typeAlias type="kr.co.qplay.memberpoint.MemberPointDTO" alias="mbpdto"/>
+		
+		<typeAlias type="kr.co.qplay.boardfree.BoardFreeDTO" alias="BoardDto"/>	
+		<typeAlias type="kr.co.qplay.boardfree.BoardFreeReplyDTO" alias="BoardReply" />
+		
+		<typeAlias alias="MemberDTO" type="kr.co.qplay.member.MemberDTO" />
+		<typeAlias alias="MemberScoreDTO" type="kr.co.qplay.memberscore.MemberScoreDTO" />
+		<typeAlias alias="QuizTypingDTO" type="kr.co.qplay.quiztyping.QuizTypingDTO" />
+		
+		
+	</typeAliases>
+	
+</configuration>

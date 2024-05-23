@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.memberScoreMapper">
+
+	<!-- 회원 개인 전적 확인 -->
+	<select id="detail" parameterType="int" resultType="MemberScoreDTO">
+		select member_m_nick, ms_winCnt, ms_loseCnt, ms_makeCnt, ms_point, ms_pointTotal
+		from qplay.member_score
+		where member_m_no=#{m_no}
+	</select>
+
+  	
+  	<!-- 회원 가입시 회원 전적 등록 -->
+	<insert id="signup" parameterType="MemberScoreDTO">
+		insert into qplay.member_score (member_m_no, member_m_id, member_m_nick)
+		values
+		(#{member_m_no}, #{member_m_id}, #{member_m_nick})
+	</insert>
+	
+	<!-- 회원 탈퇴시 회원 적전 비활성 -->
+	<update id="delete" parameterType="int">
+		update qplay.member_score
+		set
+		ms_secDate=CURRENT_TIMESTAMP
+		where member_m_no = #{member_m_no}
+	</update>
+	
+	<!-- 회원 전적 성공 횟수 증가 -->
+	<update id="winCnt" parameterType="int">
+		update qplay.member_score
+		set
+		ms_winCnt = ms_winCnt + 1
+		where member_m_no = #{member_m_no}
+	</update>
+	
+	<!--회원 전적 실패 횟수 증가 -->
+	<update id="loseCnt" parameterType="int">
+		update qplay.member_score
+		set
+		ms_loseCnt = ms_loseCnt + 1
+		where member_m_no = #{member_m_no}
+	</update>
+	
+	<!-- 회원 전적 퀴즈 정식 채택 횟수 증가 -->
+	<update id="makeCntUp" parameterType="int">
+		update qplay.member_score
+		set
+		ms_makeCnt = ms_makeCnt + 1
+		where member_m_no= #{member_m_no}
+	</update>
+	
+	<!-- 회원 전적 퀴즈 정식 채택 횟수 감소 -->
+	<update id="makeCntDown" parameterType="int">
+		update qplay.member_score
+		set
+		ms_makeCnt = ms_makeCnt - 1
+		where member_m_no= #{member_m_no}
+	</update>
+	
+  
+  
+  </mapper>

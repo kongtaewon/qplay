@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.memberPointMapper">
+	
+	<select id="list" resultType="mbpdto">
+		select * from member_score where member_m_no = #{member_m_no}
+	</select>
+	
+	<!-- 힌트 결제 -->
+	<update id="pointpay" parameterType="mbpdto">
+		update member_score set ms_point = ms_point - 5 where member_m_no = #{member_m_no}
+	</update>
+	
+	<!-- 문제 맞췄을때 포인트   -->
+	<update id="point" parameterType="mbpdto">
+		update member_score set ms_point = ms_point + 10, ms_pointTotal = ms_pointTotal + 10 where member_m_no = #{member_m_no}
+	</update>
+	
+	<!-- 문제 만들때 포인트 감소 -->
+	<update id="decrease" parameterType="mbpdto">
+		update member_score set ms_point = ms_point - 100 where member_m_no = #{member_m_no}		
+	</update>
+
+
+</mapper>

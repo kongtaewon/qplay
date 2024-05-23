@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.quizTypingMapper">
+  
+	<!-- makeType이 만든 모든 유형 주관식 퀴즈 1개 랜덤 선택 -->
+	<select id="selectRand" parameterType="String" resultType="QuizTypingDTO">
+		select qt_no, qt_question, member_m_nick, qt_hint, qt_answer, qt_makeType, qt_quizType, qt_img, qt_winCnt, qt_loseCnt
+		from qplay.quiz_typing
+		where qt_delDate is null and qt_makeType = #{qt_makeType}
+		order by rand() limit 1
+	</select>
+	
+	<!-- makeType이 만든 quizType 유형 주관식 퀴즈 1개 랜덤 선택 -->
+	<select id="selectOne" parameterType="QuizTypingDTO" resultType="QuizTypingDTO">
+		select qt_no, qt_question, member_m_nick, qt_hint, qt_answer, qt_makeType, qt_quizType, qt_img
+		from qplay.quiz_typing
+		where qt_delDate is null and qt_makeType = #{qt_makeType} and qt_quizType = #{qt_quizType}
+		order by rand() limit 1
+	</select>
+	
+	<!-- 퀴즈 번호로 퀴즈 1개 선택 -->
+	<select id="selectNo" parameterType="int" resultType="QuizTypingDTO">
+		select qt_no, qt_question, member_m_nick, qt_answer, qt_img
+		from qplay.quiz_typing
+		where qt_no = #{qt_no}
+	</select>
+	
+	<!-- 모든 주관식 퀴즈 리스트 -->
+	<select id="listAll" resultType="QuizTypingDTO">
+		select qt_no, qt_makeType, member_m_id, member_m_nick, qt_quizType, qt_winCnt, qt_loseCnt, qt_question, qt_answer, qt_hint, qt_img, qt_regDate, qt_delDate
+		from qplay.quiz_typing
+	</select>
+	
+	<!-- 회원 확인 주관식 퀴즈 리스트-->
+	<select id="listPart" parameterType="int" resultType="QuizTypingDTO">
+		select qt_makeType, qt_winCnt, qt_loseCnt, qt_question, qt_answer, qt_hint, qt_img, qt_regDate, qt_delDate
+		from qplay.quiz_typing
+		where member_m_no = #{member_m_no}
+	</select>
+	
+	<!-- 삭제되지 않은 주관식 퀴즈 전체 개수 -->
+	<select id="countAll" resultType="int">
+		select count(*)
+		from qplay.quiz_typing
+		where qt_delDate is null
+	</select>
+	
+	<!-- 주관식 퀴즈 성공 횟수 증가 -->
+	<update id="winCnt" parameterType="int">
+		update qplay.quiz_typing
+		set
+		qt_winCnt = qt_winCnt + 1
+		where qt_no = #{qt_no}
+	</update>
+	
+	<!-- 주관식 퀴즈 실패 횟수 증가 -->
+	<update id="loseCnt" parameterType="int">
+		update qplay.quiz_typing
+		set
+		qt_loseCnt = qt_loseCnt + 1
+		where qt_no = #{qt_no}
+	</update>
+	
+	<!-- 주관식 퀴즈 등록 -->
+	<insert id="insert" parameterType="QuizTypingDTO">
+		insert into qplay.quiz_typing (member_m_no, member_m_id, member_m_nick, qt_question, qt_answer, qt_makeType, qt_quizType, qt_regDate, qt_winCnt, qt_loseCnt, qt_hint, qt_img)
+		values
+		(#{member_m_no}, #{member_m_id}, #{member_m_nick}, #{qt_question}, #{qt_answer}, #{qt_makeType}, #{qt_quizType}, CURRENT_TIMESTAMP, 0, 0, #{qt_hint}, #{qt_img})
+	</insert>
+	  
+	<!-- 주관식 퀴즈 삭제 -->
+	<update id="delete" parameterType="int">
+		update qplay.quiz_typing
+		set
+		qt_delDate = CURRENT_TIMESTAMP
+		where qt_no = #{qt_no}
+	</update>
+  
+  
+  
+  
+  
+  </mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.qplay.quizMultipleMapper">
+	
+	<!-- <select id="login" parameterType="java.util.Map" resultType="java.util.Map">
+		select m_no, m_id, m_nick, m_roll from member where m_id = #{m_id} and m_password = #{m_password}
+	</select>  -->
+	
+	<!-- quiz_multiple -->
+	<select id="idselect" resultType="qmdto">
+		select * from quiz_multiple where member_m_nick = #{member_m_nick} ORDER BY qm_no DESC LIMIT 1
+	</select>
+	<select id="cnt" resultType="int">
+		select qm_no from quiz_multiple where qm_makeType = #{qm_makeType} order by rand() limit 1
+	</select>
+	<select id="quiztypeselect" resultType="qmdto">
+		select * from quiz_multiple
+	</select>
+	<select id="selectlist" resultType="qmdto">
+		select * from quiz_multiple where qm_no = #{qm_no}
+	</select>
+	<select id="pointresult" parameterType="int" resultType="String">
+		select qm_hint from quiz_multiple where qm_no = #{qm_no};
+	</select>
+	
+	
+	
+
+	
+	<!-- quiz_multiple_choice -->
+	<select id="list" resultType="qmcdto">
+		select * from quiz_multiple_choice
+	</select>
+	<select id="listone" resultType="qmcdto" parameterType="int">
+		select quiz_multiple_qm_no, qmc_contents from quiz_multiple_choice where quiz_multiple_qm_no = #{quiz_multiple_qm_no} order by rand()
+	</select>
+	
+	
+	
+	<insert id="quizinsert" parameterType="qmdto">
+		insert into
+		quiz_multiple (member_m_no, member_m_id, member_m_nick, qm_question, qm_makeType, qm_answer, qm_quizType, qm_regDate, qm_hint, qm_img)
+		values (#{member_m_no},#{member_m_id},#{member_m_nick},#{qm_question},#{qm_answer},#{qm_makeType},#{qm_quizType},curdate(),#{qm_hint},#{qm_img})
+	</insert>
+	<insert id="choiceinsert" parameterType="qmcdto">
+		insert into quiz_multiple_choice (quiz_multiple_qm_no, qmc_contents) values (#{quiz_multiple_qm_no}, #{qmc_contents})
+	</insert>
+	
+	
+	
+	<!-- 성공시 두 테이블에 1개씩 추가 -->
+	<update id="success" parameterType="int">
+		update quiz_multiple q
+		
+		inner join member_score m on q.member_m_no = m.member_m_no
+		
+		set q.qm_winCnt =  q.qm_winCnt + 1, m.ms_winCnt = m.ms_winCnt + 1
+		
+		where q.qm_no = #{qm_no};
+	</update>
+	<!-- 틀렸을때 두 테이블에 1개씩 추가 -->
+	<update id="failure" parameterType="int">
+		update quiz_multiple q
+		
+		inner join member_score m on q.member_m_no = m.member_m_no
+		
+		set q.qm_loseCnt = q.qm_loseCnt + 1, m.ms_loseCnt = m.ms_loseCnt + 1
+		
+		where q.qm_no = #{qm_no};
+	</update>
+	<!-- 선택한 보기에 1개씩 추가 -->
+	<update id="pick" parameterType="String">
+		update quiz_multiple_choice set qmc_choiceCnt = qmc_choiceCnt + 1 where qmc_contents = #{qmc_contents}
+	</update>
+	
+
+
+</mapper>
